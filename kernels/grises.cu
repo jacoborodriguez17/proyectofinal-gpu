@@ -1,6 +1,6 @@
 #include "grises.h"
 
-__global__ void escala_grises(float entrada, floatsalida, int B, int H, int W) {
+__global__ void escala_grises(float *entrada, float *salida, int B, int H, int W) {
     int col  = blockIdx.x * blockDim.x + threadIdx.x;
     int fila = blockIdx.y * blockDim.y + threadIdx.y;
 
