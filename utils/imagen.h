@@ -3,7 +3,7 @@
 /*
  * Carga B imágenes en un buffer host con layout B×3×H×W (channel-first, float [0,1]).
  * Todas las imágenes se redimensionan al tamaño de la primera.
- * El buffer se reserva internamente con malloc — el llamador debe liberarlo con free().
+ * El buffer se reserva internamente con malloc y el llamador debe liberarlo con free().
  */
 void cargar_imagenes(const char **archivos, int B, float **h_batch, int *H, int *W);
 

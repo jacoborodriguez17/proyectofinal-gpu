@@ -10,9 +10,8 @@
 #include "utils/imagen.h"
 #include "utils/timer.h"
 
-/* ------------------------------------------------------------------ */
 /* Macro para verificar errores de la API de CUDA                      */
-/* ------------------------------------------------------------------ */
+
 #define CUDA_CHECK(err)                                                        \
     do {                                                                       \
         cudaError_t _e = (err);                                                \
@@ -23,9 +22,8 @@
         }                                                                      \
     } while (0)
 
-/* ------------------------------------------------------------------ */
 /* Lista de imagenes del batch (minimo 8)                             */
-/* ------------------------------------------------------------------ */
+
 #define NUM_IMAGENES 8
 
 static const char *archivos[NUM_IMAGENES] = {
@@ -39,9 +37,8 @@ static const char *archivos[NUM_IMAGENES] = {
     "imagenes/img_07.png",
 };
 
-/* ------------------------------------------------------------------ */
 /* Pipeline CPU completo — referencia para calcular speedup           */
-/* ------------------------------------------------------------------ */
+
 static float pipeline_cpu(float *batch, int B, int H, int W) {
     int n = H * W;
     float *grises = (float *)malloc((size_t)B * n * sizeof(float));
@@ -93,19 +90,18 @@ static float pipeline_cpu(float *batch, int B, int H, int W) {
     return ms;
 }
 
-/* ------------------------------------------------------------------ */
 /* Main                                                                */
-/* ------------------------------------------------------------------ */
+
 int main(void) {
     const int B = NUM_IMAGENES;
 
-    /* 1. Cargar imagenes en CPU */
+    /* Cargar imagenes en CPU */
     float *h_batch = NULL;
     int H, W;
     cargar_imagenes(archivos, B, &h_batch, &H, &W);
     printf("Batch cargado: %d imagenes de %dx%d\n\n", B, H, W);
 
-    /* 2. Reservar memoria en GPU */
+    /* Reservar memoria en GPU */
     float *d_entrada, *d_grises, *d_bordes, *d_normalizada, *d_max_vals, *d_rmse;
 
     size_t sz_entrada = (size_t)B * 3 * H * W * sizeof(float);
@@ -119,14 +115,14 @@ int main(void) {
     CUDA_CHECK(cudaMalloc(&d_max_vals,    sz_escalar));
     CUDA_CHECK(cudaMalloc(&d_rmse,        sz_escalar));
 
-    /* 3. Transferencia H->D (unica al inicio) */
+    /* Transferencia H->D (unica al inicio) */
     Timer t_htod;
     timer_crear(&t_htod);
     timer_iniciar(&t_htod);
     CUDA_CHECK(cudaMemcpy(d_entrada, h_batch, sz_entrada, cudaMemcpyHostToDevice));
     float ms_htod = timer_detener(&t_htod);
 
-    /* 4. Configuracion del grid
+    /* Configuracion del grid
      * Bloque 16x16 = 256 threads (multiplo de 32, 8 warps por bloque).
      * Permite que el SM oculte latencias de memoria con suficiente
      * paralelismo de threads en vuelo simultaneo.
@@ -135,7 +131,7 @@ int main(void) {
     dim3 grid2d((W+15)/16, (H+15)/16);
     int  bloque_red = 256;
 
-    /* 5. Kernel 1 — Escala de grises */
+    /* Kernel 1 — Escala de grises */
     Timer t_k1;
     timer_crear(&t_k1);
     timer_iniciar(&t_k1);
@@ -143,7 +139,7 @@ int main(void) {
     CUDA_CHECK(cudaGetLastError());
     float ms_k1 = timer_detener(&t_k1);
 
-    /* 6. Kernel 2 — Deteccion de bordes */
+    /* Kernel 2 — Deteccion de bordes */
     Timer t_k2;
     timer_crear(&t_k2);
     timer_iniciar(&t_k2);
@@ -151,7 +147,7 @@ int main(void) {
     CUDA_CHECK(cudaGetLastError());
     float ms_k2 = timer_detener(&t_k2);
 
-    /* 7. Kernel 3 — Normalizacion (dos pasos) */
+    /* Kernel 3 — Normalizacion (dos pasos) */
     Timer t_k3;
     timer_crear(&t_k3);
     timer_iniciar(&t_k3);
@@ -165,7 +161,7 @@ int main(void) {
 
     float ms_k3 = timer_detener(&t_k3);
 
-    /* 8. Kernel 4 — MSE/RMSE vs imagen de referencia (imagen 0 del batch) */
+    /* Kernel 4 — MSE/RMSE vs imagen de referencia (imagen 0 del batch) */
     Timer t_k4;
     timer_crear(&t_k4);
     timer_iniciar(&t_k4);
@@ -176,7 +172,7 @@ int main(void) {
 
     float ms_k4 = timer_detener(&t_k4);
 
-    /* 9. Transferencia D->H (unica al final) */
+    /* Transferencia D->H (unica al final) */
     float *h_grises      = (float *)malloc(sz_batch);
     float *h_bordes      = (float *)malloc(sz_batch);
     float *h_normalizada = (float *)malloc(sz_batch);
@@ -191,14 +187,14 @@ int main(void) {
     CUDA_CHECK(cudaMemcpy(h_rmse,        d_rmse,        sz_escalar, cudaMemcpyDeviceToHost));
     float ms_dtoh = timer_detener(&t_dtoh);
 
-    /* 10. Guardar imagenes de verificacion */
+    /* Guardar imagenes de verificacion */
     system("mkdir -p resultados");
     guardar_png_rgb ("resultados/imagen_00_original.png",    h_batch,         B, H, W);
     guardar_png_gris("resultados/imagen_00_grises.png",      h_grises,           H, W);
     guardar_png_gris("resultados/imagen_00_bordes.png",      h_bordes,           H, W);
     guardar_png_gris("resultados/imagen_00_normalizada.png", h_normalizada,      H, W);
 
-    /* 11. Guardar RMSE por imagen */
+    /* Guardar RMSE por imagen */
     FILE *f = fopen("resultados/rmse_por_imagen.txt", "w");
     if (f) {
         fprintf(f, "RMSE por imagen (referencia = imagen_00)\n");
@@ -208,7 +204,7 @@ int main(void) {
         fclose(f);
     }
 
-    /* 12. Resumen de tiempos GPU */
+    /* Resumen de tiempos GPU */
     float ms_gpu   = ms_k1 + ms_k2 + ms_k3 + ms_k4;
     float ms_total = ms_htod + ms_gpu + ms_dtoh;
 
@@ -221,18 +217,18 @@ int main(void) {
     printf("  D->H transfer  : %7.3f ms\n", ms_dtoh);
     printf("  Total          : %7.3f ms\n\n", ms_total);
 
-    /* 13. Speedup vs CPU */
+    /* Speedup vs CPU */
     printf("Ejecutando pipeline CPU...\n");
     float ms_cpu = pipeline_cpu(h_batch, B, H, W);
     printf("  Tiempo CPU     : %7.3f ms\n", ms_cpu);
     printf("  Speedup GPU    : %7.2fx\n\n", ms_cpu / ms_gpu);
 
-    /* 14. RMSE por imagen */
+    /* RMSE por imagen */
     printf("--- RMSE por imagen (referencia = imagen_00) ---\n");
     for (int b = 0; b < B; b++)
         printf("  imagen_%02d : %.6f\n", b, h_rmse[b]);
 
-    /* 15. Liberar recursos */
+    /* Liberar recursos */
     CUDA_CHECK(cudaFree(d_entrada));
     CUDA_CHECK(cudaFree(d_grises));
     CUDA_CHECK(cudaFree(d_bordes));

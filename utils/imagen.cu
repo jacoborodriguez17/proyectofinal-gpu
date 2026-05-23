@@ -7,9 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* ------------------------------------------------------------------ */
 /* Carga un batch de imágenes en formato B×3×H×W float [0,1]          */
-/* ------------------------------------------------------------------ */
+
 void cargar_imagenes(const char **archivos, int B, float **h_batch,
                      int *H_out, int *W_out) {
     int H, W, canales;
@@ -43,7 +42,7 @@ void cargar_imagenes(const char **archivos, int B, float **h_batch,
                     archivos[b], w_img, h_img, W, H);
         }
 
-        /* Convertir HWC uint8 → CHW float [0,1] */
+        /* Convertir HWC uint8 a CHW float [0,1] */
         float *base = *h_batch + (size_t)b * 3 * H * W;
         for (int i = 0; i < H * W; i++) {
             base[0 * H * W + i] = img[i * 3 + 0] / 255.0f;  /* R */
@@ -55,10 +54,9 @@ void cargar_imagenes(const char **archivos, int B, float **h_batch,
     }
 }
 
-/* ------------------------------------------------------------------ */
 /* Guarda una imagen en escala de grises                               */
 /* datos: H×W floats [0,1]                                            */
-/* ------------------------------------------------------------------ */
+
 void guardar_png_gris(const char *nombre, float *datos, int H, int W) {
     unsigned char *buf = (unsigned char *)malloc(H * W);
     if (!buf) { fprintf(stderr, "Error: malloc fallo en guardar_png_gris\n"); return; }
@@ -76,10 +74,9 @@ void guardar_png_gris(const char *nombre, float *datos, int H, int W) {
     free(buf);
 }
 
-/* ------------------------------------------------------------------ */
 /* Guarda una imagen RGB                                               */
 /* datos: 3×H×W floats [0,1] en layout CHW                           */
-/* ------------------------------------------------------------------ */
+
 void guardar_png_rgb(const char *nombre, float *datos, int B, int H, int W) {
     (void)B;  /* se guarda siempre la primera imagen del batch */
     unsigned char *buf = (unsigned char *)malloc(H * W * 3);

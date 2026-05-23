@@ -1,11 +1,10 @@
 #include "mse.h"
 #include <math.h>
 
-/* ------------------------------------------------------------------ */
 /* Kernel 4 — MSE y RMSE con reducción en árbol usando __shared__     */
 /* Un bloque por imagen: blockIdx.x = índice de imagen b              */
 /* referencia apunta al inicio del batch normalizado (imagen 0)       */
-/* ------------------------------------------------------------------ */
+
 __global__ void calcular_mse(float *entrada, float *referencia,
                              float *rmse, int B, int H, int W) {
     extern __shared__ float sdata[];

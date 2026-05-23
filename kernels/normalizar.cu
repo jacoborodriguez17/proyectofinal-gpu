@@ -1,9 +1,8 @@
 #include "normalizar.h"
 
-/* ------------------------------------------------------------------ */
 /* Kernel 3A — Reducción en árbol para hallar el max de cada imagen   */
 /* Un bloque por imagen: blockIdx.x = índice de imagen b              */
-/* ------------------------------------------------------------------ */
+
 __global__ void reduccion_max(float *entrada, float *max_vals, int H, int W) {
     extern __shared__ float sdata[];
 
@@ -32,9 +31,8 @@ __global__ void reduccion_max(float *entrada, float *max_vals, int H, int W) {
     if (tid == 0) max_vals[b] = sdata[0];
 }
 
-/* ------------------------------------------------------------------ */
 /* Kernel 3B — Divide cada píxel entre el max de su imagen            */
-/* ------------------------------------------------------------------ */
+
 __global__ void dividir_por_max(float *entrada, float *salida,
                                 float *max_vals, int B, int H, int W) {
     int col  = blockIdx.x * blockDim.x + threadIdx.x;
