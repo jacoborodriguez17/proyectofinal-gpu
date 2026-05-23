@@ -16,4 +16,4 @@ mkdir -p imagenes resultados
 
 echo "Listo. Ahora compila con:"
 echo "  nvcc -O2 -o pipeline main.cu kernels/grises.cu kernels/bordes.cu \\"
-echo "       utils/imagen.cu utils/timer.cu -lm"
+echo "       kernels/normalizar.cu kernels/mse.cu utils/imagen.cu utils/timer.cu -lm"
