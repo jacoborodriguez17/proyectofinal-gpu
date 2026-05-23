@@ -8,7 +8,7 @@
 |---|---|
 | Jacobo Rodriguez | jacoborodriguez17 |
 | Jesus Olivas Martinez | JesusOliv4s |
-| Valeria Guitron Ortega | — |
+| Valeria Guitron Ortega | valeria-guitron |
 
 ---
 
@@ -80,25 +80,38 @@ resultados/
 
 ## Tiempos medidos en GPU (Google Colab T4)
 
+Batch: 8 imagenes de 256×256 pixeles.
+
 | Etapa | Tiempo (ms) |
 |---|---|
-| Transferencia H→D | — |
-| Kernel 1 — Grises | — |
-| Kernel 2 — Bordes Sobel | — |
-| Kernel 3 — Normalizacion | — |
-| Kernel 4 — MSE/RMSE | — |
-| Transferencia D→H | — |
-| **Total pipeline GPU** | — |
-| **Pipeline CPU** | — |
-| **Speedup** | —x |
+| Transferencia H→D | 2.217 |
+| Kernel 1 — Grises | 107.798 |
+| Kernel 2 — Bordes Sobel | 25.069 |
+| Kernel 3 — Normalizacion | 28.117 |
+| Kernel 4 — MSE/RMSE | 18.023 |
+| Transferencia D→H | 2.264 |
+| **Total pipeline** | **183.488** |
+| Pipeline CPU equivalente | 8.547 |
+| **Speedup** | **0.05x** |
 
-> Reemplazar los `—` con los valores que imprime `./pipeline` al ejecutarse.
+> El speedup es menor a 1 porque el batch es pequeno (8 imagenes de 256×256). El overhead de lanzamiento de kernels domina sobre el computo real. Con imagenes mas grandes o batches mayores el speedup de la GPU seria significativamente mayor.
 
 ---
 
 ## Valores de RMSE por imagen
 
-> *(Agregar captura de pantalla de la terminal con los valores de RMSE)*
+Referencia: imagen_00. RMSE = 0 indica que la imagen es identica a la referencia.
+
+| Imagen | RMSE |
+|---|---|
+| imagen_00 | 0.000000 |
+| imagen_01 | 0.163113 |
+| imagen_02 | 0.138749 |
+| imagen_03 | 0.152300 |
+| imagen_04 | 0.146121 |
+| imagen_05 | 0.135364 |
+| imagen_06 | 0.199792 |
+| imagen_07 | 0.136162 |
 
 ---
 
