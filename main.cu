@@ -194,6 +194,14 @@ int main(void) {
     guardar_png_gris("resultados/imagen_00_bordes.png",      h_bordes,           H, W);
     guardar_png_gris("resultados/imagen_00_normalizada.png", h_normalizada,      H, W);
 
+    /* Datos float crudos para verificacion Python (evita error de cuantizacion PNG) */
+    {
+        FILE *fg = fopen("resultados/grises_00_raw.bin", "wb");
+        if (fg) { fwrite(h_grises, sizeof(float), (size_t)H*W, fg); fclose(fg); }
+        FILE *fb = fopen("resultados/bordes_00_raw.bin", "wb");
+        if (fb) { fwrite(h_bordes, sizeof(float), (size_t)H*W, fb); fclose(fb); }
+    }
+
     /* Guardar RMSE por imagen */
     FILE *f = fopen("resultados/rmse_por_imagen.txt", "w");
     if (f) {
