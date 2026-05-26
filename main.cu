@@ -136,16 +136,18 @@ int main(void) {
     timer_crear(&t_k1);
     timer_iniciar(&t_k1);
     escala_grises<<<grid2d, bloque2d>>>(d_entrada, d_grises, B, H, W);
-    CUDA_CHECK(cudaGetLastError());
     float ms_k1 = timer_detener(&t_k1);
+    CUDA_CHECK(cudaDeviceSynchronize());
+    CUDA_CHECK(cudaGetLastError());
 
     /* Kernel 2 — Deteccion de bordes */
     Timer t_k2;
     timer_crear(&t_k2);
     timer_iniciar(&t_k2);
     deteccion_bordes<<<grid2d, bloque2d>>>(d_grises, d_bordes, B, H, W);
-    CUDA_CHECK(cudaGetLastError());
     float ms_k2 = timer_detener(&t_k2);
+    CUDA_CHECK(cudaDeviceSynchronize());
+    CUDA_CHECK(cudaGetLastError());
 
     /* Kernel 3 — Normalizacion (dos pasos) */
     Timer t_k3;
@@ -157,9 +159,9 @@ int main(void) {
     CUDA_CHECK(cudaGetLastError());
 
     dividir_por_max<<<grid2d, bloque2d>>>(d_bordes, d_normalizada, d_max_vals, B, H, W);
-    CUDA_CHECK(cudaGetLastError());
-
     float ms_k3 = timer_detener(&t_k3);
+    CUDA_CHECK(cudaDeviceSynchronize());
+    CUDA_CHECK(cudaGetLastError());
 
     /* Kernel 4 — MSE/RMSE vs imagen de referencia (imagen 0 del batch) */
     Timer t_k4;
@@ -168,9 +170,9 @@ int main(void) {
 
     calcular_mse<<<B, bloque_red, bloque_red * sizeof(float)>>>(
         d_normalizada, d_normalizada, d_rmse, B, H, W);
-    CUDA_CHECK(cudaGetLastError());
-
     float ms_k4 = timer_detener(&t_k4);
+    CUDA_CHECK(cudaDeviceSynchronize());
+    CUDA_CHECK(cudaGetLastError());
 
     /* Transferencia D->H (unica al final) */
     float *h_grises      = (float *)malloc(sz_batch);
