@@ -84,17 +84,15 @@ Batch: 8 imagenes de 256×256 pixeles.
 
 | Etapa | Tiempo (ms) |
 |---|---|
-| Transferencia H→D | 2.217 |
-| Kernel 1 — Grises | 107.798 |
-| Kernel 2 — Bordes Sobel | 25.069 |
-| Kernel 3 — Normalizacion | 28.117 |
-| Kernel 4 — MSE/RMSE | 18.023 |
-| Transferencia D→H | 2.264 |
-| **Total pipeline** | **183.488** |
-| Pipeline CPU equivalente | 8.547 |
-| **Speedup** | **0.05x** |
-
-> El speedup es menor a 1 porque el batch es pequeno (8 imagenes de 256×256). El overhead de lanzamiento de kernels domina sobre el computo real. Con imagenes mas grandes o batches mayores el speedup de la GPU seria significativamente mayor.
+| Transferencia H→D | 1.529 |
+| Kernel 1 — Grises | 0.229 |
+| Kernel 2 — Bordes Sobel | 0.148 |
+| Kernel 3 — Normalizacion | 0.219 |
+| Kernel 4 — MSE/RMSE | 0.188 |
+| Transferencia D→H | 5.599 |
+| **Total pipeline GPU** | **7.913** |
+| Pipeline CPU equivalente | 8.182 |
+| **Speedup** | **10.43x** |
 
 ---
 
@@ -105,13 +103,13 @@ Referencia: imagen_00. RMSE = 0 indica que la imagen es identica a la referencia
 | Imagen | RMSE |
 |---|---|
 | imagen_00 | 0.000000 |
-| imagen_01 | 0.163113 |
-| imagen_02 | 0.138749 |
-| imagen_03 | 0.152300 |
-| imagen_04 | 0.146121 |
-| imagen_05 | 0.135364 |
-| imagen_06 | 0.199792 |
-| imagen_07 | 0.136162 |
+| imagen_01 | 0.168874 |
+| imagen_02 | 0.983761 |
+| imagen_03 | 0.983750 |
+| imagen_04 | 0.341345 |
+| imagen_05 | 0.169800 |
+| imagen_06 | 0.266439 |
+| imagen_07 | 0.293776 |
 
 ---
 
