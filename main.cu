@@ -189,19 +189,36 @@ int main(void) {
     CUDA_CHECK(cudaMemcpy(h_rmse,        d_rmse,        sz_escalar, cudaMemcpyDeviceToHost));
     float ms_dtoh = timer_detener(&t_dtoh);
 
-    /* Guardar imagenes de verificacion */
+    /* Guardar resultados de las B imagenes */
     system("mkdir -p resultados");
-    guardar_png_rgb ("resultados/imagen_00_original.png",    h_batch,         B, H, W);
-    guardar_png_gris("resultados/imagen_00_grises.png",      h_grises,           H, W);
-    guardar_png_gris("resultados/imagen_00_bordes.png",      h_bordes,           H, W);
-    guardar_png_gris("resultados/imagen_00_normalizada.png", h_normalizada,      H, W);
-
-    /* Datos float crudos para verificacion Python (evita error de cuantizacion PNG) */
     {
-        FILE *fg = fopen("resultados/grises_00_raw.bin", "wb");
-        if (fg) { fwrite(h_grises, sizeof(float), (size_t)H*W, fg); fclose(fg); }
-        FILE *fb = fopen("resultados/bordes_00_raw.bin", "wb");
-        if (fb) { fwrite(h_bordes, sizeof(float), (size_t)H*W, fb); fclose(fb); }
+        char nombre[64];
+        for (int b = 0; b < B; b++) {
+            float *rgb_b   = h_batch      + (size_t)b * 3 * H * W;
+            float *gris_b  = h_grises     + (size_t)b * H * W;
+            float *borde_b = h_bordes     + (size_t)b * H * W;
+            float *norm_b  = h_normalizada + (size_t)b * H * W;
+
+            snprintf(nombre, sizeof(nombre), "resultados/imagen_%02d_original.png",    b);
+            guardar_png_rgb(nombre, rgb_b, 1, H, W);
+
+            snprintf(nombre, sizeof(nombre), "resultados/imagen_%02d_grises.png",      b);
+            guardar_png_gris(nombre, gris_b, H, W);
+
+            snprintf(nombre, sizeof(nombre), "resultados/imagen_%02d_bordes.png",      b);
+            guardar_png_gris(nombre, borde_b, H, W);
+
+            snprintf(nombre, sizeof(nombre), "resultados/imagen_%02d_normalizada.png", b);
+            guardar_png_gris(nombre, norm_b, H, W);
+
+            snprintf(nombre, sizeof(nombre), "resultados/grises_%02d_raw.bin",         b);
+            FILE *fg = fopen(nombre, "wb");
+            if (fg) { fwrite(gris_b,  sizeof(float), (size_t)H*W, fg); fclose(fg); }
+
+            snprintf(nombre, sizeof(nombre), "resultados/bordes_%02d_raw.bin",         b);
+            FILE *fb = fopen(nombre, "wb");
+            if (fb) { fwrite(borde_b, sizeof(float), (size_t)H*W, fb); fclose(fb); }
+        }
     }
 
     /* Guardar RMSE por imagen */
