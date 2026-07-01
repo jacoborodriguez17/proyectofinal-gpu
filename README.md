@@ -1,4 +1,8 @@
-# Pipeline de Procesamiento de Imagenes en GPU
+# CUDA Image Processing Pipeline
+
+GPU-accelerated image processing pipeline developed in CUDA C++.
+
+Features grayscale conversion, Sobel edge detection, normalization and RMSE computation using parallel GPU kernels.
 
 **Curso:** Introduccion al Computo en GPU
 
